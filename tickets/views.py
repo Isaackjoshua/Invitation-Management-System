@@ -8,6 +8,7 @@ from .serializers import TicketSerializer
 from .utils import generate_numeric_code
 from attendees.models import Attendee
 from events.models import Event
+from .qr import generate_ticket_qr
 
 class TicketCreateView(APIView):
     permission_classes = [IsAdmin]
@@ -30,9 +31,13 @@ class TicketCreateView(APIView):
             event=event,
             numeric_code = generate_numeric_code(),
         )
+        generate_ticket_qr(ticket)
+        ticket.save()
 
         serializer = TicketSerializer(ticket)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+       
+
 
 # Create your views here.

@@ -8,6 +8,7 @@ class TicketSerializer(serializers.ModelSerializer):
     event_name = serializers.CharField(
         source="event.name", read_only=True
     )
+    qr_image = serializers.ImageField(read_only=True)
 
     class Meta:
         model = Ticket
@@ -18,6 +19,7 @@ class TicketSerializer(serializers.ModelSerializer):
             "attendee",
             "attendee_name",
             "numeric_code",
+            "qr_image",
             "is_checked_in",
             "checked_in_at",
             "created_at",
@@ -29,3 +31,4 @@ class TicketSerializer(serializers.ModelSerializer):
             "checked_in_at",
             "created_at",
         )
+    
