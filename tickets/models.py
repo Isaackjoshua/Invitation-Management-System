@@ -8,8 +8,27 @@ class Ticket(models.Model):
 
     numeric_code = models.CharField(max_length=8, unique=True)
     is_checked_in = models.BooleanField(default=False)
-    checked_in_at = models.DurationField(null=True, blank=True)
+    checked_in_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
+
+    numeric_code = models.CharField(
+        max_length=8,
+        unique = True,
+        db_index=True
+    )
+    class Meta:
+         indexes = [
+             models.Index(fields=["numeric_code"]),
+             models.Index(fields=["is_checked_in"]),
+         ]
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["event", "attendee"],
+                name="unique_ticket_per_event_attendee"
+        )
+    ]
+
     
 # Create your models here.
