@@ -1,7 +1,12 @@
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib.colors import HexColor
 from django.conf import settings
 import os
+
+PRIMARY_COLOR = HexColor("#0A2540")   # dark blue
+ACCENT_COLOR = HexColor("#F2F4F7")    # light gray
+
 
 def generate_ticket_pdf(ticket):
     file_name = f"{ticket.numeric_code}.pdf"
@@ -12,21 +17,66 @@ def generate_ticket_pdf(ticket):
     c = canvas.Canvas(file_path, pagesize=A4)
     width, height = A4
 
-    # Title
-    c.setFont("Helvetica-Bold", 20)
-    c.drawCentredString(width / 2, height - 80, "EVENT TICKET")
+    # ---------------- HEADER ----------------
+    c.setFillColor(PRIMARY_COLOR)
+    c.rect(0, height - 120, width, 120, stroke=0, fill=1)
 
-    # Event Info
+    # Logo
+    logo_path = os.path.join(settings.MEDIA_ROOT, "branding/logo.png")
+    if os.path.exists(logo_path):
+        c.drawImage(logo_path, 60, height - 95, width=120, height=60, mask="auto")
+
+    # Event name
+    c.setFillColor("white")
+    c.setFont("Helvetica-Bold", 22)
+    c.drawRightString(width - 60, height - 70, ticket.event.name)
+
+    # ---------------- BODY ----------------
+    c.setFillColor("black")
     c.setFont("Helvetica", 12)
-    c.drawString(80, height - 140, f"Event: {ticket.event.name}")
-    c.drawString(80, height - 170, f"Location: {ticket.event.location}")
-    c.drawString(80, height - 200, f"Attendee: {ticket.attendee.full_name}")
-    c.drawString(80, height - 230, f"Ticket Code: {ticket.numeric_code}")
 
-    # QR Image
+    start_y = height - 180
+    line_gap = 28
+
+    c.drawString(80, start_y, "Attendee Name")
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(80, start_y - 20, ticket.attendee.full_name)
+
+    c.setFont("Helvetica", 12)
+    c.drawString(80, start_y - line_gap * 2, "Event Location")
+    c.setFont("Helvetica-Bold", 14)
+    c.drawString(80, start_y - line_gap * 2 - 20, ticket.event.location)
+
+    c.setFont("Helvetica", 12)
+    c.drawString(80, start_y - line_gap * 4, "Ticket Code")
+    c.setFont("Helvetica-Bold", 16)
+    c.drawString(80, start_y - line_gap * 4 - 22, ticket.numeric_code)
+
+    # ---------------- QR SECTION ----------------
+    c.setFillColor(ACCENT_COLOR)
+    c.roundRect(width - 300, start_y - 180, 200, 240, 12, stroke=0, fill=1)
+
     if ticket.qr_code_image:
-        qr_path = ticket.qr_code_image.path
-        c.drawImage(qr_path, width - 240, height - 320, width=160, height=160)
+        c.drawImage(
+            ticket.qr_code_image.path,
+            width - 270,
+            start_y - 150,
+            width=140,
+            height=140
+        )
+
+    c.setFillColor("black")
+    c.setFont("Helvetica", 10)
+    c.drawCentredString(width - 200, start_y - 170, "Scan at entry")
+
+    # ---------------- FOOTER ----------------
+    c.setFont("Helvetica-Oblique", 9)
+    c.setFillColor("#555555")
+    c.drawCentredString(
+        width / 2,
+        40,
+        "This ticket is valid for one entry only. Duplicate scans will be rejected."
+    )
 
     c.showPage()
     c.save()
