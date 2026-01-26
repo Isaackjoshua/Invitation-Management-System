@@ -10,7 +10,7 @@ def generate_ticket_qr(ticket):
     qr.save(buffer, format="PNG")
 
     file_name = f"{ticket.numeric_code}.png"
-    ticket.qr_image.save(
+    ticket.qr_code_image.save(
         file_name,
         ContentFile(buffer.getvalue()),
         save=False

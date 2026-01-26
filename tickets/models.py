@@ -5,7 +5,8 @@ class Ticket(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     event = models.ForeignKey('events.Event', on_delete=models.CASCADE)
     attendee = models.OneToOneField('attendees.Attendee', on_delete=models.CASCADE)
-
+    pdf_ticket = models.FileField(upload_to="pdf_tickets/", blank=True)
+    
     numeric_code = models.CharField(
         max_length=8,
         unique=True,
@@ -13,7 +14,7 @@ class Ticket(models.Model):
     )
     is_checked_in = models.BooleanField(default=False)
     checked_in_at = models.DateTimeField(null=True, blank=True)
-    qr_image = models.ImageField(
+    qr_code_image = models.ImageField(
         upload_to="qr_codes/",
         null=True,
         blank=True

@@ -9,6 +9,10 @@ from .utils import generate_numeric_code
 from attendees.models import Attendee
 from events.models import Event
 from .qr import generate_ticket_qr
+from rest_framework.permissions import IsAuthenticated
+from django.http import FileResponse
+from django.shortcuts import get_object_or_404
+from tickets.services.ticket_service import create_ticket
 
 class TicketCreateView(APIView):
     permission_classes = [IsAdmin]
@@ -26,18 +30,25 @@ class TicketCreateView(APIView):
         attendee = Attendee.objects.get(id=attendee_id)
         event = Event.objects.get(id=event_id)
 
-        ticket = Ticket.objects.create(
-            attendee=attendee,
-            event=event,
-            numeric_code = generate_numeric_code(),
-        )
-        generate_ticket_qr(ticket)
-        ticket.save()
+        ticket = create_ticket(event=event, attendee=attendee)
 
         serializer = TicketSerializer(ticket)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
-       
 
+
+class TicketPDFDownloadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, ticket_code):
+        ticket = get_object_or_404(Ticket, numeric_code=ticket_code)
+
+        if not ticket.pdf_ticket:
+            return Response({"error": "PDF not available"}, status=404)
+
+        return FileResponse(
+            open(ticket.pdf_ticket.path, "rb"),
+            content_type="application/pdf"
+        )
 
 # Create your views here.
