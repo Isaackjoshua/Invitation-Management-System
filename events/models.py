@@ -9,6 +9,7 @@ class Event(models.Model):
     end_time = models.DateTimeField()
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    sms_template = models.TextField(default="Hello {name}, your ticket for {event} is confirmed. code: {code}")
 
     def __str__(self):
         return self.name

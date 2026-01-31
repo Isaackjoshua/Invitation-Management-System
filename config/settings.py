@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'attendees',
     'tickets',
     'checkins',
+    'notifications',
 
 ]
 
@@ -166,3 +167,8 @@ LOGGING = {
         "level": "INFO",
     },
 }
+
+AT_USERNAME = "sandbox"
+AT_API_KEY = "atsk_76cd021806916f772b707005f2206d6d8cff2dc28ae0a186dba239e3e55fc0fc5c6ac00c"
+
+#atsk_76cd021806916f772b707005f2206d6d8cff2dc28ae0a186dba239e3e55fc0fc5c6ac00c
